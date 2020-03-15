@@ -1,4 +1,5 @@
 ﻿using services.Models;
+using services.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Configuration.Install;
@@ -12,6 +13,11 @@ namespace services
     {
         public static void Main(string[] args)
         {
+            var services = AmagnoWindowsServicesFinder.FindServices(@"D:\Amagno\DevOps\Server\");
+
+
+
+
             if (IsListCommand(args))
             {
                 WriteServicesList(args);
