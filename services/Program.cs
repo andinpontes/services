@@ -1,28 +1,13 @@
-﻿using System;
+﻿using services.Models;
+using System;
 using System.Collections.Generic;
 using System.Configuration.Install;
-using System.IO;
 using System.Linq;
 using System.Management;
 using System.ServiceProcess;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace services
 {
-    public class ServiceInfo
-    {
-        public string Name { get; set; }
-        public string DisplayName { get; set; }
-        public ServiceControllerStatus Status { get; set; }
-        public string PathName { get; set; }
-        public string Description { get; set; }
-        public ServiceStartMode StartType { get; set; }
-        public ServiceType ServiceType { get; set; }
-        public uint ProcessId { get; set; }
-        public bool IsInstalled { get; set; }
-    }
-
     public class Program
     {
         public static void Main(string[] args)
