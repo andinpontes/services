@@ -50,6 +50,10 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\AmagnoWindowsServicesFinder.cs" />
+    <Compile Include="Utilities\LocationFinder.cs" />
+    <Compile Include="Utilities\NativeMethods.cs" />
+    <Compile Include="Utilities\ServiceControlHandle.cs" />
+    <Compile Include="Utilities\ServiceCreator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

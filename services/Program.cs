@@ -1,22 +1,30 @@
-﻿using services.Models;
-using services.Utilities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration.Install;
+using System.IO;
 using System.Linq;
 using System.Management;
 using System.ServiceProcess;
+
+using services.Models;
+using services.Utilities;
 
 namespace services
 {
     public class Program
     {
+        public static string SearchPath { get; set; } = Directory.GetCurrentDirectory();
+
         public static void Main(string[] args)
         {
-            var services = AmagnoWindowsServicesFinder.FindServices(@"D:\Amagno\DevOps\Server\");
+            //var service = @"D:\Amagno\DevOps\Server\AmagnoService\bin\AmagnoClassificationService.exe";
+            //var service = @"D:\Amagno\DevOps\Server\AmagnoService\bin\AmagnoClearingService.exe";
+            //InstallService(service);
+            //UninstallService(service);
 
-
-
+            //###################################
+            SearchPath = @"D:\Amagno\DevOps\Server\";
+            //###################################
 
             if (IsListCommand(args))
             {
@@ -125,30 +133,60 @@ namespace services
         {
             var serviceInfos = GetInstalledServices();
 
+            var amagnoServices = FindAmagnoServices(args);
+            var amagnoServiceInfos = amagnoServices
+                .Select(e => new ServiceInfo { PathName = e, Name = Path.GetFileName(e), Location = LocationFinder.GetLocationByCommandLine(e) })
+                .OrderBy(e => e.Name)
+                .Select(e => TakeBestInfo(e, serviceInfos))
+                .ToArray();
+
             //TODO:
             // Select the correct services and add some infos for not yet installed services.
 
             return serviceInfos;
         }
 
+        private static ServiceInfo TakeBestInfo(ServiceInfo baseInfo, ServiceInfo[] serviceInfos)
+        {
+            var fittingInfo = serviceInfos.FirstOrDefault(e => e.Location == baseInfo.Location);
+            if (fittingInfo == null)
+            {
+                return baseInfo;
+            }
+
+            return fittingInfo;
+        }
 
         private static string[] FindAmagnoServices(string[] args)
         {
+            Console.WriteLine($"Searching services in '{SearchPath}'.");
+            var services = AmagnoWindowsServicesFinder.FindServices(SearchPath).ToArray();
+            //var services = AmagnoWindowsServicesFinder.FindServices(searchPath);
+
             //TODO:
             //var serviceInfos = GetAllServiceInfos();
 
-            //TODO:
-            return new string[] { };
+            return services;
         }
 
         private static void InstallService(string filename)
         {
-            ManagedInstallerClass.InstallHelper(new string[] { filename });
+            var serviceName = Path.GetFileNameWithoutExtension(filename);
+            var serviceCreator = new ServiceCreator(filename, serviceName);
+            serviceCreator.CreateService();
+
+            //@"sc.exe create AmagnoClassificationService binPath=%rootPath%AmagnoClassificationService\bin\AmagnoClassificationService.exe start=delayed-auto"
+
+            //ManagedInstallerClass.InstallHelper(new string[] { filename });
         }
 
         private static void UninstallService(string filename)
         {
-            ManagedInstallerClass.InstallHelper(new string[] { "/u", filename });
+            var serviceName = Path.GetFileNameWithoutExtension(filename);
+            var serviceCreator = new ServiceCreator(filename, serviceName);
+            serviceCreator.RemoveService();
+
+            //ManagedInstallerClass.InstallHelper(new string[] { "/u", filename });
         }
 
         private static ServiceInfo[] GetInstalledServices()
@@ -162,6 +200,7 @@ namespace services
             {
                 var wmiInfo = wmiInfos.FirstOrDefault(e => e["Name"] as string == service.ServiceName);
                 var pathName = NormalizePath(wmiInfo["PathName"] as string);
+
                 var description = wmiInfo["Description"] as string;
                 var processId = Convert.ToUInt32(wmiInfo["ProcessId"]);
 
@@ -171,6 +210,7 @@ namespace services
                     DisplayName = service.DisplayName,
                     Status = service.Status,
                     PathName = pathName,
+                    Location = LocationFinder.GetLocationByCommandLine(pathName),
                     Description = description,
                     StartType = service.StartType,
                     ServiceType = service.ServiceType,

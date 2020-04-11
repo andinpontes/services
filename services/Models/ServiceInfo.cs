@@ -8,6 +8,7 @@ namespace services.Models
         public string DisplayName { get; set; }
         public ServiceControllerStatus Status { get; set; }
         public string PathName { get; set; }
+        public string Location { get; set; }
         public string Description { get; set; }
         public ServiceStartMode StartType { get; set; }
         public ServiceType ServiceType { get; set; }

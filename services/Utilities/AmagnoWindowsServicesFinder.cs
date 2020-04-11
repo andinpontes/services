@@ -49,7 +49,7 @@ namespace services.Utilities
             try
             {
                 var attributes = type.GetTypeInfo().GetCustomAttributes();
-                if (attributes.Any(IsServiceAttribute))
+                if (attributes.Any(IsAmagnoServiceAttribute))
                 {
                     return true;
                 }
@@ -62,7 +62,7 @@ namespace services.Utilities
             }
         }
 
-        private static bool IsServiceAttribute(Attribute attribute)
+        private static bool IsAmagnoServiceAttribute(Attribute attribute)
         {
             var type = attribute.GetType();
             return type.FullName.Contains("Amagno.Service.Shared.Service.AmagnoWindowsServiceAttribute");
